@@ -17,7 +17,7 @@ Step-by-step sync of a static website or files between Github and AWS S3 bucket 
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::anesthesia-forms/*"
+            "Resource": "arn:aws:s3:::bucket-name/*"
         }
     ]
 }
