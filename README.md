@@ -36,29 +36,39 @@ Step-by-step sync of a static website or files between Github and AWS S3 bucket 
 # Step 3: Configure GitHub repo Create with action workflow file to sync on Push.
  * On your GitHub Repo Click on settings.
  * Select Secrets from the left sidebar
- * Create two Secret Keys 
+ * Create three Secret Keys for AWS_S3_BUCKET, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
  * On your GitHub repo click on Actions and a workflow file by clicking on the New Workflow Button.
  * Paste the bellow code in the action workflow file 
 
 ```
 
 name: uploadToS3
+
 on:
   push:
     branches: [ "main" ]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: jakejarvis/s3-sync-action@master
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        args: --acl public-read --follow-symlinks --delete  --exclude '.git/*'
-      env:
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'us-east-2'   # optional: defaults to us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'us-east-2'
+
+    - name: Install AWS CLI
+      run: sudo apt-get install -y awscli
+
+    - name: Sync files to S3
+      run: |
+        aws s3 sync ./ s3://${{ secrets.AWS_S3_BUCKET }} --delete
+
 
 ```
 
